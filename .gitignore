@@ -1,0 +1,54 @@
+# Ignore build outputs
+/build/
+/**/build/
+*.apk
+/**/outputs/**/*.apk
+**/build/**/*.apk
+
+# Dart/Flutter specific
+.dart_tool/
+**/.dart_tool/
+/flutter_build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Ignoring IntelliJ IDE project files
+.idea/
+*.iml
+
+# Ignore local configuration
+/local.properties
+
+# Keystore files
+**/*.keystore
+**/*.jks
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Windows related
+/windows/
+
+# Java Development Kit (JDK)
+jdk/

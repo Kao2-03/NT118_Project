@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Color for com_facebook_button_background_color_focused_disabled -->
+    <color name="com_facebook_button_background_color_focused_disabled">#FFFFFF</color>
+
+    <!-- Color for com_facebook_button_background_color_focused -->
+    <color name="com_facebook_button_background_color_focused">#CCCCCC</color>
+
+    <!-- Color for com_facebook_button_border_color_focused -->
+    <color name="com_facebook_button_border_color_focused">#000000</color>
+</resources>
