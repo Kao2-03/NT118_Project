@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import './CartAppBar.dart';
+import 'package:flutter_project/ui/cart/CartAppBar.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -11,6 +11,9 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // List to store selected items
+  List<String> selectedItems = [];
 
   void _incrementQuantity(String docId, int currentQuantity) {
     _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').doc(docId).update({
@@ -36,10 +39,28 @@ class _CartPageState extends State<CartPage> {
     // Implement the checkout logic here
   }
 
+  void _toggleSelection(String docId) {
+    setState(() {
+      if (selectedItems.contains(docId)) {
+        selectedItems.remove(docId);
+      } else {
+        selectedItems.add(docId);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      selectedItems.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CartAppBar(),
+      appBar: CartAppBar(
+        onClearSelection: _clearSelection,
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').snapshots(),
         builder: (context, snapshot) {
@@ -50,7 +71,9 @@ class _CartPageState extends State<CartPage> {
 
           double totalPrice = 0;
           cartItems.forEach((doc) {
-            totalPrice += doc['price'] * doc['quantity'];
+            if (selectedItems.contains(doc.id)) {
+              totalPrice += doc['price'] * doc['quantity'];
+            }
           });
 
           return Column(
@@ -60,11 +83,12 @@ class _CartPageState extends State<CartPage> {
                   itemCount: cartItems.length,
                   itemBuilder: (context, index) {
                     final cartItem = cartItems[index];
+                    bool isSelected = selectedItems.contains(cartItem.id);
                     return Card(
                       child: ListTile(
                         leading: Image.network(cartItem['imageUrl']),
                         title: Text(cartItem['productName']),
-                        subtitle: Text('Price: \$${cartItem['price']}'),
+                        subtitle: Text('Price: ${cartItem['price']} vnd'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -81,6 +105,12 @@ class _CartPageState extends State<CartPage> {
                                 _incrementQuantity(cartItem.id, cartItem['quantity']);
                               },
                             ),
+                            Checkbox(
+                              value: isSelected,
+                              onChanged: (bool? value) {
+                                _toggleSelection(cartItem.id);
+                              },
+                            ),
                             IconButton(
                               icon: Icon(Icons.delete),
                               onPressed: () {
@@ -90,6 +120,7 @@ class _CartPageState extends State<CartPage> {
                           ],
                         ),
                       ),
+                      color: isSelected ? Colors.grey.withOpacity(0.5) : null,
                     );
                   },
                 ),
@@ -100,7 +131,7 @@ class _CartPageState extends State<CartPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Tổng tiền: \$${totalPrice.toStringAsFixed(2)}',
+                      'Tổng tiền: ${totalPrice.toStringAsFixed(2)} vnd',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
