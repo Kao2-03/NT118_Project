@@ -8,14 +8,14 @@ class ProductDetailPage extends StatefulWidget {
   final double productPrice;
   final String productDescription;
   final String productImage;
-  final int productRating; // Thêm thuộc tính rating
+  final int productRating;
 
   ProductDetailPage({
     required this.productName,
     required this.productPrice,
     required this.productDescription,
     required this.productImage,
-    required this.productRating, // Thêm vào constructor
+    required this.productRating,
   });
 
   @override
@@ -181,10 +181,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ],
             ),
             SizedBox(height: 20),
+            Row(
+            children: [
             Text(
-              widget.productDescription,
-              style: TextStyle(fontSize: 16),
-            ),
+              'Mô tả: ',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            SizedBox(width: 5), // Thêm khoảng cách giữa Text 'Mô tả:' và nội dung mô tả
+            Flexible( // Sử dụng Flexible để đảm bảo nội dung mô tả có thể xuống dòng nếu cần
+            child: Text(
+            widget.productDescription,
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+      ],
+    ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {

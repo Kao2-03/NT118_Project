@@ -7,10 +7,9 @@ class Bouquets {
   final String title;
   final double price;
   final int rating;
+  final String description;
 
-  Bouquets(this.image, this.title, this.price, this.rating);
-
-  get description => 'Mô tả sản phẩm: $title';
+  Bouquets(this.image, this.title, this.price, this.rating, this.description);
 }
 
 class SearchPage extends StatefulWidget {
@@ -42,6 +41,7 @@ class _SearchPageState extends State<SearchPage> {
           doc['title'],
           (doc['price'] as num).toDouble(),
           (doc['rating'] as num).toInt(),
+          doc['description'],
         ));
       });
       setState(() {
@@ -53,8 +53,8 @@ class _SearchPageState extends State<SearchPage> {
 
   void filterSearchResults(String query) {
     List<Bouquets> searchResults = allBouquets
-        .where((bouquet) =>
-            bouquet.title.toLowerCase().contains(query.toLowerCase()))
+        .where((bouquets) =>
+            bouquets.title.toLowerCase().contains(query.toLowerCase()))
         .toList();
     setState(() {
       displayList = searchResults;

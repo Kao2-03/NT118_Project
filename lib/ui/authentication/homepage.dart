@@ -110,16 +110,21 @@ class _HomePageState extends State<HomePage> {
                   productName: "Combo hoa phấn",
                   productPrice: 125000,
                   productImage: "assets/images/flower1.jpg",
+                  productDescription: "mô tả",
                 ),
                 _ProductCard(
                   productName: "Combo gì sẵn",
                   productPrice: 48000,
                   productImage: "assets/images/flower2.jpg",
+                  productDescription: "mô tả",
+
                 ),
                 _ProductCard(
                   productName: "Tulip",
                   productPrice: 400000,
                   productImage: "assets/images/flower3.jpg",
+                  productDescription: "mô tả",
+
                 ),
               ],
             ),
@@ -190,12 +195,15 @@ class _ProductCard extends StatelessWidget {
   final String productName;
   final double productPrice;
   final String productImage;
+  
+  final String productDescription;
 
   const _ProductCard({
     Key? key,
     required this.productName,
     required this.productPrice,
-    required this.productImage,
+    required this.productImage, 
+    required this.productDescription,
   }) : super(key: key);
 
   @override
@@ -216,7 +224,8 @@ class _ProductCard extends StatelessWidget {
                         productImage,
                         productName,
                         productPrice,
-                        5, // Adjust as necessary
+                        5,
+                        productDescription, // Adjust as necessary
                       ),
                     );
                   },
