@@ -258,8 +258,9 @@ void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
       builder: (context) => ProductDetailPage(
         productName: bouquet.title,
         productPrice: bouquet.price,
-        productDescription: 'Mô tả sản phẩm: ${bouquet.title}',
+        productDescription: 'Mô tả sản phẩm: ${bouquet.description}',
         productImage: bouquet.image,
+        productRating: bouquet.rating
       ),
     ),
   );

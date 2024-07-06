@@ -8,12 +8,14 @@ class ProductDetailPage extends StatefulWidget {
   final double productPrice;
   final String productDescription;
   final String productImage;
+  final int productRating; // Thêm thuộc tính rating
 
   ProductDetailPage({
     required this.productName,
     required this.productPrice,
     required this.productDescription,
     required this.productImage,
+    required this.productRating, // Thêm vào constructor
   });
 
   @override
@@ -147,6 +149,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
+            Row(
+              children: [
+                Text(
+                  'Giá: ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '\$${widget.productPrice.toString()}',
+                  style: TextStyle(fontSize: 18, color: Colors.green),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Text(
+                  'Đánh giá: ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: List.generate(
+                    widget.productRating,
+                    (index) => Icon(
+                      Icons.star,
+                      color: Colors.yellow,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
             Text(
               widget.productDescription,
               style: TextStyle(fontSize: 16),
