@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_project/constants.dart';
 import '../cart/CartPage.dart';
 import '../search/SearchPage.dart';
@@ -29,6 +28,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _navigateToSearchPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SearchPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,29 +61,22 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: EdgeInsets.all(16),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SearchPage()),
-                  );
-                },
+                onTap: _navigateToSearchPage,
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Tìm kiếm",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Constants.basicColor),
+                      SizedBox(width: 10),
+                      Text(
+                        "Tìm kiếm",
+                        style: TextStyle(color: Constants.basicColor),
                       ),
-                      prefixIcon: Icon(Icons.search, color: Constants.basicColor),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -262,15 +261,6 @@ void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
         productDescription: 'Mô tả sản phẩm: ${bouquet.title}',
         productImage: bouquet.image,
       ),
-    ),
-  );
-}
-
-void navigateToSearchPage(BuildContext context) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => SearchPage(),
     ),
   );
 }
