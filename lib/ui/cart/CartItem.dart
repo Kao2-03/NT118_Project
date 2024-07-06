@@ -32,7 +32,7 @@ class CartItem extends StatelessWidget {
           radius: 30,
         ),
         title: Text(productName),
-        subtitle: Text('\$$price x $quantity'),
+        subtitle: Text('$price vnd x $quantity'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
