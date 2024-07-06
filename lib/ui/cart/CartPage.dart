@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_project/ux/cart/FirebaseService.dart';
-import 'CartItem.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import './CartAppBar.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -9,117 +9,111 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  final FirebaseService _firebaseService = FirebaseService();
-  final ValueNotifier<double> _totalPriceNotifier = ValueNotifier<double>(0.0);
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  @override
-  void initState() {
-    super.initState();
-    _calculateTotalPrice();
+  void _incrementQuantity(String docId, int currentQuantity) {
+    _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').doc(docId).update({
+      'quantity': currentQuantity + 1,
+    });
   }
 
-  void _calculateTotalPrice() async {
-    double totalPrice = await _firebaseService.calculateTotalPrice();
-    _totalPriceNotifier.value = totalPrice;
+  void _decrementQuantity(String docId, int currentQuantity) {
+    if (currentQuantity > 1) {
+      _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').doc(docId).update({
+        'quantity': currentQuantity - 1,
+      });
+    } else {
+      _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').doc(docId).delete();
+    }
+  }
+
+  void _removeItem(String docId) {
+    _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').doc(docId).delete();
+  }
+
+  void _checkout() {
+    // Implement the checkout logic here
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Giỏ hàng"),
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        elevation: 0,
-      ),
+      appBar: CartAppBar(),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firebaseService.getCartItems(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        stream: _firestore.collection('users').doc(_auth.currentUser!.uid).collection('cartItems').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
+          final cartItems = snapshot.data!.docs;
 
-          if (snapshot.hasError) {
-            return Center(child: Text("Có lỗi xảy ra: ${snapshot.error}"));
-          }
+          double totalPrice = 0;
+          cartItems.forEach((doc) {
+            totalPrice += doc['price'] * doc['quantity'];
+          });
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            _totalPriceNotifier.value = 0.0; // Cập nhật tổng tiền về 0 khi giỏ hàng trống
-            return Center(child: Text("Giỏ hàng trống"));
-          }
-
-          List<CartItem> cartItems = snapshot.data!.docs.map((doc) {
-            return CartItem(
-              productId: doc.id,
-              productName: doc['productName'],
-              price: (doc['price'] as num).toDouble(),
-              quantity: (doc['quantity'] as num).toInt(),
-              imageUrl: doc['imageUrl'],
-              isSelected: doc['isSelected'] ?? false,
-              firebaseService: _firebaseService,
-              onQuantityChanged: _calculateTotalPrice,
-            );
-          }).toList();
-
-          return ListView(
-            children: cartItems,
-          );
-        },
-      ),
-      bottomNavigationBar: ValueListenableBuilder<double>(
-        valueListenable: _totalPriceNotifier,
-        builder: (context, totalPrice, child) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            height: 130,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cartItems.length,
+                  itemBuilder: (context, index) {
+                    final cartItem = cartItems[index];
+                    return Card(
+                      child: ListTile(
+                        leading: Image.network(cartItem['imageUrl']),
+                        title: Text(cartItem['productName']),
+                        subtitle: Text('Price: \$${cartItem['price']}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.remove),
+                              onPressed: () {
+                                _decrementQuantity(cartItem.id, cartItem['quantity']);
+                              },
+                            ),
+                            Text('${cartItem['quantity']}'),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                                _incrementQuantity(cartItem.id, cartItem['quantity']);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                _removeItem(cartItem.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Tổng cộng:",
+                      'Tổng tiền: \$${totalPrice.toStringAsFixed(2)}',
                       style: TextStyle(
-                        color: Colors.pink,
-                        fontSize: 25,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      "$totalPrice vnd",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.pink,
-                      ),
+                    ElevatedButton(
+                      onPressed: _checkout,
+                      child: Text('Thanh toán'),
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () {
-                    // Xử lý chốt đơn
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: 50,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.pink,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      "Chốt đơn",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),

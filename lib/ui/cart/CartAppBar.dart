@@ -14,7 +14,7 @@ class CartAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       title: Text(
-        "Cart",
+        "Giỏ hàng", // Thay đổi "Cart" thành "Giỏ hàng" để phù hợp với tiếng Việt
         style: TextStyle(
           fontSize: 23.sp, // Sử dụng ScreenUtil cho kích thước text
           fontWeight: FontWeight.bold,
@@ -25,7 +25,7 @@ class CartAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: Icon(Icons.more_vert, color: Colors.pink, size: 30.w), // Sử dụng ScreenUtil cho kích thước icon
           onPressed: () {
-            // Handle more options here
+            // Xử lý các tùy chọn khác ở đây
           },
         ),
       ],
