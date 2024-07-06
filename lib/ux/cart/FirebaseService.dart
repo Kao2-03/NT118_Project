@@ -42,4 +42,15 @@ class FirebaseService {
 
     return totalPrice;
   }
+
+  // Thêm mặt hàng vào giỏ hàng
+  void addToCart(String productId, String productName, double price, String imageUrl) {
+    _firestore.collection('cartItems').doc(productId).set({
+      'productName': productName,
+      'price': price,
+      'quantity': 1,
+      'imageUrl': imageUrl,
+      'isSelected': false,
+    });
+  }
 }
