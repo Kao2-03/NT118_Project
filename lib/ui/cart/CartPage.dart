@@ -50,12 +50,12 @@ class _CartPageState extends State<CartPage> {
 
           List<CartItem> cartItems = snapshot.data!.docs.map((doc) {
             return CartItem(
-              key: ValueKey(doc.id),
               productId: doc.id,
               productName: doc['productName'],
               price: (doc['price'] as num).toDouble(),
               quantity: (doc['quantity'] as num).toInt(),
               imageUrl: doc['imageUrl'],
+              isSelected: doc['isSelected'] ?? false,
               firebaseService: _firebaseService,
               onQuantityChanged: _calculateTotalPrice,
             );
