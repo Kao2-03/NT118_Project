@@ -10,7 +10,7 @@ class Bouquets {
 
   Bouquets(this.image, this.title, this.price, this.rating);
 
-  get description => null;
+  get description => 'Mô tả sản phẩm: $title';
 }
 
 class SearchPage extends StatefulWidget {
@@ -51,6 +51,30 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  void filterSearchResults(String query) {
+    List<Bouquets> searchResults = allBouquets
+        .where((bouquet) =>
+            bouquet.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    setState(() {
+      displayList = searchResults;
+    });
+  }
+
+  void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(
+          productName: bouquet.title,
+          productPrice: bouquet.price,
+          productDescription: bouquet.description,
+          productImage: bouquet.image,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,22 +82,20 @@ class _SearchPageState extends State<SearchPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
+        title: Text(
+          "Tìm kiếm sản phẩm",
+          style: TextStyle(
+            color: Color.fromARGB(255, 234, 33, 100),
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Bạn muốn tìm gì?",
-              style: TextStyle(
-                color: Color.fromARGB(255, 234, 33, 100),
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 20),
             TextField(
               controller: _searchController,
               style: TextStyle(color: Color.fromARGB(255, 24, 24, 24)),
@@ -85,8 +107,7 @@ class _SearchPageState extends State<SearchPage> {
                   borderSide: BorderSide.none,
                 ),
                 hintText: "Nhập từ khóa",
-                prefixIcon: Icon(Icons.search),
-                prefixIconColor: Colors.pink,
+                prefixIcon: Icon(Icons.search, color: Colors.pink),
               ),
               onChanged: (value) {
                 filterSearchResults(value);
@@ -98,6 +119,8 @@ class _SearchPageState extends State<SearchPage> {
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.75,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
                 ),
                 itemCount: displayList.length,
                 itemBuilder: (context, index) {
@@ -146,30 +169,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void filterSearchResults(String query) {
-    List<Bouquets> searchResults = allBouquets
-        .where((bouquet) =>
-            bouquet.title.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    setState(() {
-      displayList = searchResults;
-    });
-  }
-
-  void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductDetailPage(
-          productName: bouquet.title,
-          productPrice: bouquet.price,
-          productDescription: 'Mô tả sản phẩm: ${bouquet.title}',
-          productImage: bouquet.image,
         ),
       ),
     );
