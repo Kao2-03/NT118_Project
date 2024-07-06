@@ -70,6 +70,7 @@ class _SearchPageState extends State<SearchPage> {
           productPrice: bouquet.price,
           productDescription: bouquet.description,
           productImage: bouquet.image,
+          productRating: bouquet.rating,
         ),
       ),
     );
