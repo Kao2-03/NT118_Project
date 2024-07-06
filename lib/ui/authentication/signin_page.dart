@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../ux/auth/auth_service.dart';
 import 'homepage.dart';
 import 'register_form.dart';
+import 'package:flutter_project/ux/cart/FirebaseService.dart';
+
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -80,6 +82,8 @@ class _SignInState extends State<SignIn> {
         );
         // Đăng nhập thành công
         _saveUserInfo();
+       FirebaseService firebaseService = FirebaseService(); // Tạo một thể hiện của FirebaseService
+    firebaseService.resetCartSelection(); // Reset trạng thái chọn sản phẩm trong giỏ hàng
         _navigateToHome(context);
       } catch (e) {
         _showAlertDialog("Thông báo", "Email hoặc mật khẩu không đúng");

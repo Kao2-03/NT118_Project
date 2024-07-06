@@ -53,4 +53,12 @@ class FirebaseService {
       'isSelected': false,
     });
   }
+  // Reset trạng thái chọn sản phẩm trong giỏ hàng
+  void resetCartSelection() {
+    _firestore.collection('cartItems').get().then((querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        _firestore.collection('cartItems').doc(doc.id).update({'isSelected': false});
+      });
+    });
+  }
 }
