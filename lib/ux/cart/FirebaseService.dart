@@ -43,16 +43,30 @@ class FirebaseService {
     return totalPrice;
   }
 
-  // Thêm mặt hàng vào giỏ hàng
+   // Thêm mặt hàng vào giỏ hàng và cộng dồn số lượng nếu đã tồn tại
   void addToCart(String productId, String productName, double price, String imageUrl) {
-    _firestore.collection('cartItems').doc(productId).set({
-      'productName': productName,
-      'price': price,
-      'quantity': 1,
-      'imageUrl': imageUrl,
-      'isSelected': false,
+    DocumentReference productRef = _firestore.collection('cartItems').doc(productId);
+
+    productRef.get().then((docSnapshot) {
+      if (docSnapshot.exists) {
+        // Sản phẩm đã tồn tại trong giỏ hàng, cập nhật số lượng
+        int currentQuantity = docSnapshot['quantity'];
+        productRef.update({
+          'quantity': currentQuantity + 1,
+        });
+      } else {
+        // Sản phẩm chưa tồn tại trong giỏ hàng, thêm mới
+        productRef.set({
+          'productName': productName,
+          'price': price,
+          'quantity': 1,
+          'imageUrl': imageUrl,
+          'isSelected': false,
+        });
+      }
     });
   }
+
   // Reset trạng thái chọn sản phẩm trong giỏ hàng
   void resetCartSelection() {
     _firestore.collection('cartItems').get().then((querySnapshot) {
