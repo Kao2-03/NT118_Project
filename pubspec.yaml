@@ -27,7 +27,7 @@ dependencies:
   crypto: ^3.0.1
   webview_flutter: ^2.0.14
   http: ^0.13.5
-  flutter_svg: ^2.0.10
+
   flutter_paypal_checkout: ^1.0.0
 dev_dependencies:
   flutter_test:
