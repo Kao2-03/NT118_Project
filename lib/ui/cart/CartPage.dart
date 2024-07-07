@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_project/ui/cart/CartAppBar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../cart/CartAppBar.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -12,7 +13,6 @@ class _CartPageState extends State<CartPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // List to store selected items
   List<String> selectedItems = [];
 
   void _incrementQuantity(String docId, int currentQuantity) {
@@ -85,61 +85,123 @@ class _CartPageState extends State<CartPage> {
                     final cartItem = cartItems[index];
                     bool isSelected = selectedItems.contains(cartItem.id);
                     return Card(
-                      child: ListTile(
-                        leading: Image.network(cartItem['imageUrl']),
-                        title: Text(cartItem['productName']),
-                        subtitle: Text('Price: ${cartItem['price']} vnd'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      elevation: 4,
+                      margin: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.w),
+                        child: Row(
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.remove),
-                              onPressed: () {
-                                _decrementQuantity(cartItem.id, cartItem['quantity']);
-                              },
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(15.r),
+                              child: Image.network(
+                                cartItem['imageUrl'],
+                                width: 80.w,
+                                height: 80.h,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            Text('${cartItem['quantity']}'),
-                            IconButton(
-                              icon: Icon(Icons.add),
-                              onPressed: () {
-                                _incrementQuantity(cartItem.id, cartItem['quantity']);
-                              },
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cartItem['productName'],
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 5.h),
+                                  Text(
+                                    'Price: ${cartItem['price']} vnd',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () {
+                                          _decrementQuantity(cartItem.id, cartItem['quantity']);
+                                        },
+                                      ),
+                                      Text('${cartItem['quantity']}'),
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          _incrementQuantity(cartItem.id, cartItem['quantity']);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            Checkbox(
-                              value: isSelected,
-                              onChanged: (bool? value) {
-                                _toggleSelection(cartItem.id);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () {
-                                _removeItem(cartItem.id);
-                              },
+                            Column(
+                              children: [
+                                Checkbox(
+                                  value: isSelected,
+                                  onChanged: (bool? value) {
+                                    _toggleSelection(cartItem.id);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    _removeItem(cartItem.id);
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      color: isSelected ? Colors.grey.withOpacity(0.5) : null,
+                      color: isSelected ? Colors.grey.withOpacity(0.2) : Colors.white,
                     );
                   },
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Container(
+                color: Colors.grey[200],
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Column(
                   children: [
-                    Text(
-                      'Tổng tiền: ${totalPrice.toStringAsFixed(2)} vnd',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Tổng tiền: ${totalPrice.toStringAsFixed(2)} vnd',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: _checkout,
-                      child: Text('Thanh toán'),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _checkout,
+                          child: Text(
+                            'Thanh toán',
+                            style: TextStyle(fontSize: 16.sp),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 246, 83, 116),
+                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

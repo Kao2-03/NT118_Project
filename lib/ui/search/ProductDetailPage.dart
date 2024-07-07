@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../cart/CartPage.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -8,12 +9,14 @@ class ProductDetailPage extends StatefulWidget {
   final double productPrice;
   final String productDescription;
   final String productImage;
+  final int productRating;
 
   ProductDetailPage({
     required this.productName,
     required this.productPrice,
     required this.productDescription,
     required this.productImage,
+    required this.productRating,
   });
 
   @override
@@ -97,66 +100,132 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       appBar: AppBar(
         title: Text(widget.productName),
         actions: [
-          IconButton(
-            icon: Stack(
-              children: [
-                Icon(Icons.shopping_cart),
-                if (cartItemCount > 0)
-                  Positioned(
-                    right: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(Icons.shopping_cart),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CartPage()),
+                  );
+                },
+              ),
+              if (cartItemCount > 0)
+                Positioned(
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 14,
+                      minHeight: 14,
+                    ),
+                    child: Text(
+                      '$cartItemCount',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
                       ),
-                      constraints: BoxConstraints(
-                        minWidth: 14,
-                        minHeight: 14,
-                      ),
-                      child: Text(
-                        '$cartItemCount',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CartPage()),
-              );
-            },
+                ),
+            ],
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(widget.productImage),
-            SizedBox(height: 16),
-            Text(
-              widget.productName,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            SizedBox(height: 16.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    widget.productImage,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ),
-            SizedBox(height: 10),
-            Text(
-              widget.productDescription,
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                addToCart(widget.productName, widget.productPrice, widget.productImage);
-              },
-              child: Text('Thêm vào giỏ hàng'),
+            SizedBox(height: 16.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.productName,
+                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 246, 83, 116)),
+                  ),
+                  SizedBox(height: 10.h),
+                  Row(
+                    children: [
+                      Text(
+                        'Giá: ',
+                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '\$${widget.productPrice.toString()}',
+                        style: TextStyle(fontSize: 18.sp, color: Colors.green),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Row(
+                    children: [
+                      Text(
+                        'Đánh giá: ',
+                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: List.generate(
+                          widget.productRating,
+                          (index) => Icon(
+                            Icons.star,
+                            color: Colors.yellow,
+                            size: 20.sp,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    'Mô tả: ',
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    widget.productDescription,
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                  SizedBox(height: 20.h),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        addToCart(widget.productName, widget.productPrice, widget.productImage);
+                      },
+                      child: Text(
+                        'Thêm vào giỏ hàng',
+                        style: TextStyle(fontSize: 18.sp),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h), backgroundColor: Colors.pink,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                ],
+              ),
             ),
           ],
         ),
