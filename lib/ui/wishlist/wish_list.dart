@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class wishList extends StatefulWidget {
-  static String userId = 'NgSNTazXm2ZTG3NAjWrGeMr82Yx1';
   
   @override
   State<wishList> createState() => _wishListState();
