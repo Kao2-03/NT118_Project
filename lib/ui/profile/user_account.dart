@@ -1,21 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_project/ui/authentication/onboarding_screen.dart';
+import 'package:flutter_project/ui/authentication/signin_page.dart';
 import 'package:flutter_project/ui/cart/profile_pic.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class UserPage extends StatefulWidget {
-  static String userId = 'NgSNTazXm2ZTG3NAjWrGeMr82Yx1';
-
   @override
   State<UserPage> createState() => _UserPageState();
 }
 
 class _UserPageState extends State<UserPage> {
-  final _userDoc = FirebaseFirestore.instance
-      .collection("users")
-      .doc(UserPage.userId) 
-      .snapshots();
+  User? user = FirebaseAuth.instance.currentUser;
+
+  late final _userDoc =
+      FirebaseFirestore.instance.collection("users").doc(user?.uid).snapshots();
+
+  Future<void> _updateUser(Map<String, dynamic> updatedData) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user?.uid)
+          .update(updatedData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Cập nhật thành công')),
+      );
+    } catch (e) {
+      print('Error updating user: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Có lỗi xảy ra, vui lòng thử lại')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,91 +50,109 @@ class _UserPageState extends State<UserPage> {
               return const Text('Loading...');
             }
             var data = snapshot.data!.data() as Map<String, dynamic>;
+
+            Map<String, dynamic> updatedData = {
+              'fullName': data['fullName'],
+              'email': data['email'],
+              'password': data['password'],
+            };
+
             return Column(
-            children: [
-              ProfilePic(),
-              SizedBox(
-                height: 70,
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: TextField(
-                  showCursor: false,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    filled: true,
-                    fillColor: Color(0xFFFF5F6F9),
-                    hintText: data['fullName']??'',
-                  ),
+              children: [
+                ProfilePic(),
+                SizedBox(
+                  height: 70,
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: TextField(
-                  showCursor: false,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    filled: true,
-                    fillColor: Color(0xFFFF5F6F9),
-                    hintText: data['email']??'' ,
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: TextField(
-                  showCursor: false,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    filled: true,
-                    fillColor: Color(0xFFFF5F6F9),
-                    hintText: data['password']??'',
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: TextButton(
-                    style: ButtonStyle(
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(150, 60)),
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Color(0xFFF653A6)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          EdgeInsets.zero),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: TextField(
+                    showCursor: false,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Color(0xFFFF5F6F9),
+                      hintText: data['fullName'] ?? '',
                     ),
-                    onPressed: () {},
-                    child: Text(
-                      'Save Change',
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ),
-              SizedBox(
-                height: 3,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextButton(
-                    style: ButtonStyle(
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(150, 60)),
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Color(0xFFF5F6F9)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                          EdgeInsets.zero),
+                    onChanged: (value) => updatedData['fullName'] = value,
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: TextField(
+                    showCursor: false,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Color(0xFFFF5F6F9),
+                      hintText: data['email'] ?? '',
                     ),
-                    onPressed: () {},
-                    child: Text(
-                      'log out',
-                      style: TextStyle(color: Colors.red),
-                    )),
-              ),
-            ],
-          );
+                    onChanged: (value) => updatedData['email'] = value,
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: TextField(
+                    showCursor: false,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      filled: true,
+                      fillColor: Color(0xFFFF5F6F9),
+                      hintText: data['password'] ?? '',
+                    ),
+                    onChanged: (value) => updatedData['password'] = value,
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: TextButton(
+                      style: ButtonStyle(
+                        minimumSize:
+                            MaterialStateProperty.all<Size>(Size(150, 60)),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Color(0xFFF653A6)),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                            EdgeInsets.zero),
+                      ),
+                      onPressed: () {
+                        _updateUser(updatedData);
+                      },
+                      child: Text(
+                        'Save Change',
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ),
+                SizedBox(
+                  height: 3,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextButton(
+                      style: ButtonStyle(
+                        minimumSize:
+                            MaterialStateProperty.all<Size>(Size(150, 60)),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Color(0xFFF5F6F9)),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                            EdgeInsets.zero),
+                      ),
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => OnboardingScreen()),
+                        );
+                      },
+                      child: Text(
+                        'log out',
+                        style: TextStyle(color: Colors.red),
+                      )),
+                ),
+              ],
+            );
           }),
     );
   }
