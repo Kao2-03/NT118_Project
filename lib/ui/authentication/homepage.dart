@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter_project/ui/cart/user_account.dart';
+import 'package:flutter_project/ui/profile/user_account.dart';
+import 'package:flutter_project/ui/myOrder/my_order.dart';
+import 'package:flutter_project/ui/wishlist/wish_list.dart';
 import '../search/SearchPage.dart'; // Import trang search để điều hướng khi tìm kiếm
 import '../search/ProductDetailPage.dart'; // Import trang chi tiết sản phẩm
-import '../cart/user_account.dart';
+// import '../cart/user_account.dart';
 import '../cart/CartPage.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,7 +20,12 @@ class _HomePageState extends State<HomePage> {
   late List<Bouquets> displayList = [];
   late List<Bouquets> allBouquets = [];
   int _selectedIndex = 0; // Current index for BottomNavigationBar
-  List<String> _types = ['Sinh nhật', 'Tiệc cưới', 'Hoa mừng', 'Lãng mạn']; // List of types from Firebase
+  List<String> _types = [
+    'Sinh nhật',
+    'Tiệc cưới',
+    'Hoa mừng',
+    'Lãng mạn'
+  ]; // List of types from Firebase
 
   @override
   void initState() {
@@ -32,8 +41,14 @@ class _HomePageState extends State<HomePage> {
       List<Bouquets> bouquets = [];
       snapshot.docs.forEach((DocumentSnapshot doc) {
         // Kiểm tra xem các trường cần thiết có tồn tại không
-        if (doc.exists && doc.data() != null && doc['image'] != null && doc['title'] != null &&
-            doc['price'] != null && doc['rating'] != null && doc['description'] != null && doc['type'] != null) {
+        if (doc.exists &&
+            doc.data() != null &&
+            doc['image'] != null &&
+            doc['title'] != null &&
+            doc['price'] != null &&
+            doc['rating'] != null &&
+            doc['description'] != null &&
+            doc['type'] != null) {
           bouquets.add(Bouquets(
             doc['image'],
             doc['title'],
@@ -51,15 +66,16 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-void filterBouquetsByType(String type) {
-  setState(() {
-    if (type == 'All') {
-      displayList = allBouquets; // Show all bouquets
-    } else {
-      displayList = allBouquets.where((bouquet) => bouquet.type == type).toList();
-    }
-  });
-}
+  void filterBouquetsByType(String type) {
+    setState(() {
+      if (type == 'All') {
+        displayList = allBouquets; // Show all bouquets
+      } else {
+        displayList =
+            allBouquets.where((bouquet) => bouquet.type == type).toList();
+      }
+    });
+  }
 
   void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
     Navigator.push(
@@ -76,25 +92,43 @@ void filterBouquetsByType(String type) {
     );
   }
 
-void _onItemTapped(int index) {
-  setState(() {
-    _selectedIndex = index;
-  });
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
 
-  if (index == 3) {
-    // Navigate to Profile page
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UserPage()),
-    );
+    if (index == 3) {
+      // Navigate to Profile page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => UserPage()),
+      );
+    }
+
+    if (index == 2) {
+      // Navigate to Profile page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MyOrder()),
+      );
+    }
+
+    if (index == 1) {
+      // Navigate to Profile page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => wishList()),
+      );
+    }
   }
-}
 
   void goToCartPage(BuildContext context) {
     // Navigate to cart page
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CartPage()), // Replace with your actual cart page
+      MaterialPageRoute(
+          builder: (context) =>
+              CartPage()), // Replace with your actual cart page
     );
   }
 
@@ -103,7 +137,6 @@ void _onItemTapped(int index) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Florish'),
-        
         actions: [
           IconButton(
             icon: Icon(Icons.search),
@@ -139,19 +172,22 @@ void _onItemTapped(int index) {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: List.generate(_types.length, (index) {
-                  return _CategoryCard(typeName: _types[index], onTap: () => filterBouquetsByType(_types[index]));
+                  return _CategoryCard(
+                      typeName: _types[index],
+                      onTap: () => filterBouquetsByType(_types[index]));
                 }),
               ),
             ),
             SizedBox(height: 16),
             Container(
-              width: MediaQuery.of(context).size.width , 
+              width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.all(16.0),
               margin: EdgeInsets.symmetric(horizontal: 16.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 image: DecorationImage(
-                  image: AssetImage("assets/images/flower1.jpg"), // Your advertisement image asset
+                  image: AssetImage(
+                      "assets/images/flower1.jpg"), // Your advertisement image asset
                   fit: BoxFit.cover,
                 ),
               ),
@@ -244,18 +280,21 @@ void _onItemTapped(int index) {
           ],
         ),
       ),
-     bottomNavigationBar: BottomNavigationBar(
-  items: const <BottomNavigationBarItem>[
-    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Florish'),
-    BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
-    BottomNavigationBarItem(icon: Icon(Icons.reorder_rounded), label: 'My Order'),
-    BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-  ],
-  currentIndex: _selectedIndex,
-  selectedItemColor: Colors.pink, // Set selected item color to pink
-  unselectedItemColor: Colors.grey, // Set unselected item color to grey
-  onTap: _onItemTapped,
-),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Florish'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite), label: 'Favorite'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.reorder_rounded), label: 'My Order'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle), label: 'Profile'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.pink, // Set selected item color to pink
+        unselectedItemColor: Colors.grey, // Set unselected item color to grey
+        onTap: _onItemTapped,
+      ),
     );
   }
 }
@@ -268,14 +307,16 @@ class Bouquets {
   final String description;
   final String type; // Thay đổi từ category thành type
 
-  Bouquets(this.image, this.title, this.price, this.rating, this.description, this.type);
+  Bouquets(this.image, this.title, this.price, this.rating, this.description,
+      this.type);
 }
 
 class _CategoryCard extends StatelessWidget {
   final String typeName;
   final VoidCallback onTap;
 
-  const _CategoryCard({Key? key, required this.typeName, required this.onTap}) : super(key: key);
+  const _CategoryCard({Key? key, required this.typeName, required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -291,5 +332,3 @@ class _CategoryCard extends StatelessWidget {
     );
   }
 }
-
-
