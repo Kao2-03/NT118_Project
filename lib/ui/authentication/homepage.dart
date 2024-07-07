@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../search/SearchPage.dart'; // Import trang search để điều hướng khi tìm kiếm
 import '../search/ProductDetailPage.dart'; // Import trang chi tiết sản phẩm
-import '../cart/user_account.dart'; 
+import '../cart/user_account.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   late List<Bouquets> displayList = [];
   late List<Bouquets> allBouquets = [];
   int _selectedIndex = 0; // Current index for BottomNavigationBar
-  String _selectedCategory = 'All'; // Default category
+  String _selectedType = 'All'; // Default type
 
   @override
   void initState() {
@@ -30,28 +30,33 @@ class _HomePageState extends State<HomePage> {
         .listen((QuerySnapshot snapshot) {
       List<Bouquets> bouquets = [];
       snapshot.docs.forEach((DocumentSnapshot doc) {
-        bouquets.add(Bouquets(
-          doc['image'],
-          doc['title'],
-          (doc['price'] as num).toDouble(),
-          (doc['rating'] as num).toInt(),
-          doc['description'],
-          doc['type'], // Assuming category field in Firestore
-        ));
+        // Kiểm tra xem các trường cần thiết có tồn tại không
+        if (doc.exists && doc.data() != null && doc['image'] != null && doc['title'] != null &&
+            doc['price'] != null && doc['rating'] != null && doc['description'] != null && doc['type'] != null) {
+          bouquets.add(Bouquets(
+            doc['image'],
+            doc['title'],
+            (doc['price'] as num).toDouble(),
+            (doc['rating'] as num).toInt(),
+            doc['description'],
+            doc['type'],
+          ));
+        }
       });
       setState(() {
         allBouquets = bouquets;
-        filterBouquetsByCategory(_selectedCategory); // Apply filter by default category
+        displayList = bouquets; // Hiển thị tất cả sản phẩm ban đầu
       });
     });
   }
 
-  void filterBouquetsByCategory(String category) {
+  void filterBouquetsByType(String type) {
     setState(() {
-      if (category == 'All') {
-        displayList = allBouquets;
+      _selectedType = type;
+      if (type == 'All') {
+        displayList = allBouquets; // Hiển thị tất cả sản phẩm nếu chọn 'All'
       } else {
-        displayList = allBouquets.where((bouquet) => bouquet.category == category).toList();
+        displayList = allBouquets.where((bouquet) => bouquet.type == type).toList();
       }
     });
   }
@@ -133,18 +138,16 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
-                  // Example categories
-                  _CategoryCard(categoryName: "Lãng mạn", onTap: () => filterBouquetsByCategory("Romantic")),
-                  _CategoryCard(categoryName: "Tiệc cưới", onTap: () => filterBouquetsByCategory("Wedding")),
-                  _CategoryCard(categoryName: "Sinh nhật", onTap: () => filterBouquetsByCategory("Birthday")),
-                  _CategoryCard(categoryName: "Hoa mừng", onTap: () => filterBouquetsByCategory("Congratulations")),
-                  // Add more _CategoryCard widgets for additional categories
+                  _CategoryCard(typeName: "Hoa mừng", onTap: () => filterBouquetsByType("Bó Hoa")),
+                  _CategoryCard(typeName: "Lãng mạn", onTap: () => filterBouquetsByType("Wedding")),
+                  _CategoryCard(typeName: "Tiệc cưới", onTap: () => filterBouquetsByType("Birthday")),
+                  _CategoryCard(typeName: "Sinh nhật", onTap: () => filterBouquetsByType("Congratulations")),
                 ],
               ),
             ),
             SizedBox(height: 16),
             Container(
-              width: MediaQuery.of(context).size.width , // Take full width of the screen with 16 padding on each side
+              width: MediaQuery.of(context).size.width , 
               padding: EdgeInsets.all(16.0),
               margin: EdgeInsets.symmetric(horizontal: 16.0),
               decoration: BoxDecoration(
@@ -265,16 +268,16 @@ class Bouquets {
   final double price;
   final int rating;
   final String description;
-  final String category; // New field for category
+  final String type; // Thay đổi từ category thành type
 
-  Bouquets(this.image, this.title, this.price, this.rating, this.description, this.category);
+  Bouquets(this.image, this.title, this.price, this.rating, this.description, this.type);
 }
 
 class _CategoryCard extends StatelessWidget {
-  final String categoryName;
+  final String typeName;
   final VoidCallback onTap;
 
-  const _CategoryCard({Key? key, required this.categoryName, required this.onTap}) : super(key: key);
+  const _CategoryCard({Key? key, required this.typeName, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +287,7 @@ class _CategoryCard extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text(categoryName),
+          child: Text(typeName),
         ),
       ),
     );
