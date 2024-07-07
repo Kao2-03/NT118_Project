@@ -1,27 +1,33 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_project/constants.dart';
+
 import '../cart/CartPage.dart';
 import '../search/SearchPage.dart';
-import 'package:flutter/painting.dart';
+
+import 'package:flutter/material.dart';
+import '/../constants.dart';
 import '../cart/user_account.dart';
-import '../search/ProductDetailPage.dart';
+import '../search/ProductDetail.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Current index for BottomNavigationBar
 
+  // Function to handle navigation logic
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
     if (index == 3) {
+      // Assuming index 3 is 'Profile'
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => UserPage()),
+      );
+    } else if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => UserPage()),
@@ -35,15 +41,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(Constants.titleFive, style: TextStyle(color: Constants.primaryColor)),
+        title: Text(Constants.titleFive,
+            style: TextStyle(color: Constants.primaryColor)),
         actions: [
           IconButton(
             icon: Icon(Icons.shopping_cart, color: Constants.basicColor),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CartPage()),
-              );
+              // Add your shopping cart functionality here
             },
           ),
         ],
@@ -56,6 +60,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.all(16),
               child: GestureDetector(
                 onTap: () {
+                  // Navigate to the SearchPage when the search bar is tapped
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SearchPage()),
@@ -76,7 +81,8 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(10.0),
                         borderSide: BorderSide.none,
                       ),
-                      prefixIcon: Icon(Icons.search, color: Constants.basicColor),
+                      prefixIcon:
+                          Icon(Icons.search, color: Constants.basicColor),
                     ),
                   ),
                 ),
@@ -84,13 +90,15 @@ class _HomePageState extends State<HomePage> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Text("Danh mục", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text("Danh mục",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
+                  // Example categories
                   _CategoryCard(categoryName: "Lãng mạn"),
                   _CategoryCard(categoryName: "Tiệc cưới"),
                   _CategoryCard(categoryName: "Sinh nhật"),
@@ -108,31 +116,24 @@ class _HomePageState extends State<HomePage> {
               mainAxisSpacing: 10,
               children: <Widget>[
                 _ProductCard(
-                  productName: "Combo hoa phấn",
-                  productPrice: 125000,
-                  productImage: "assets/images/flower1.jpg",
-                ),
+                    productName: "Combo hoa phấn", productPrice: "125.000"),
                 _ProductCard(
-                  productName: "Combo gì sẵn",
-                  productPrice: 48000,
-                  productImage: "assets/images/flower2.jpg",
-                ),
-                _ProductCard(
-                  productName: "Tulip",
-                  productPrice: 400000,
-                  productImage: "assets/images/flower3.jpg",
-                ),
+                    productName: "Combo hoa sẵn", productPrice: "48.000"),
+                _ProductCard(productName: "Tulip", productPrice: "400.000"),
               ],
-            ),
+            )
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
-          BottomNavigationBarItem(icon: Icon(Icons.reorder_rounded), label: 'My order'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite), label: 'Favorite'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.reorder_rounded), label: 'My order'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle), label: 'Profile'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Constants.primaryColor,
@@ -168,7 +169,8 @@ class CreateYourOwnBouquet extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         image: DecorationImage(
-          image: AssetImage("assets/images/flower1.jpg"),
+          image:
+              AssetImage("assets/images/flower1.jpg"), // Background image asset
           fit: BoxFit.cover,
         ),
       ),
@@ -177,7 +179,7 @@ class CreateYourOwnBouquet extends StatelessWidget {
         child: Text(
           "Create your own Bouquet\nexpress yourself by create your own unique bouquet",
           style: TextStyle(
-            color: Color.fromARGB(255, 224, 223, 223),
+            color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -189,78 +191,78 @@ class CreateYourOwnBouquet extends StatelessWidget {
 
 class _ProductCard extends StatelessWidget {
   final String productName;
-  final double productPrice;
-  final String productImage;
+  final String productPrice;
 
   const _ProductCard({
     Key? key,
     required this.productName,
     required this.productPrice,
-    required this.productImage,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 13,
-                child: InkWell(
-                  onTap: () {
-                    navigateToProductDetail(
-                      context,
-                      Bouquets(
-                        productImage,
-                        productName,
-                        productPrice,
-                        5, // Adjust as necessary
-                      ),
-                    );
-                  },
-                  child: Image.asset(productImage, fit: BoxFit.cover),
+      child: InkWell(
+        onTap: () {
+          navigateToProductDetail(
+            context,
+            productName,
+            productPrice,
+            'những bông hoa này tỏa ra vẻ thanh khiết và duyên dáng, những cánh hoa tinh khôi của chúng mở ra trong những đường cong nhẹ nhàng và phát ra một hương thơm ngọt nhẹ, tinh tế.', // Product description
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Image.asset(
+                  "assets/images/flower2.jpg",
+                  fit: BoxFit.cover,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(productName, style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text('\$${productPrice.toString()}', style: TextStyle(color: Constants.primaryColor)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            top: 8.0,
-            right: 8.0,
-            child: IconButton(
-              icon: Icon(Icons.favorite_border, color: Colors.white),
-              onPressed: () {
-                // Handle button press
-              },
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(productName, style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(productPrice, style: TextStyle(color: Colors.black)),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, right: 8.0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: Icon(Icons.favorite_border, color: Colors.white),
+                  onPressed: () {
+                    // Handle button press
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
+
+
+void navigateToProductDetail(BuildContext context, String productName,
+    String productPrice, String productDescription) {
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => ProductDetailPage(
-        productName: bouquet.title,
-        productPrice: bouquet.price,
-        productDescription: 'Mô tả sản phẩm: ${bouquet.title}',
-        productImage: bouquet.image,
+        productName: productName,
+        productPrice: productPrice,
+        productDescription: productDescription,
       ),
     ),
   );
@@ -269,8 +271,6 @@ void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
 void navigateToSearchPage(BuildContext context) {
   Navigator.push(
     context,
-    MaterialPageRoute(
-      builder: (context) => SearchPage(),
-    ),
+    MaterialPageRoute(builder: (context) => SearchPage()),
   );
 }
