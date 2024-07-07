@@ -1,21 +1,76 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/constants.dart';
-import '../cart/CartPage.dart';
-import '../search/SearchPage.dart';
-import 'package:flutter/painting.dart';
-import '../cart/user_account.dart';
-import '../search/ProductDetailPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../search/SearchPage.dart'; // Import trang search để điều hướng khi tìm kiếm
+import '../search/ProductDetailPage.dart'; // Import trang chi tiết sản phẩm
+import '../cart/user_account.dart'; 
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  late List<Bouquets> displayList = [];
+  late List<Bouquets> allBouquets = [];
   int _selectedIndex = 0; // Current index for BottomNavigationBar
+  String _selectedCategory = 'All'; // Default category
 
-  // Function to handle navigation logic
+  @override
+  void initState() {
+    super.initState();
+    fetchBouquets();
+  }
+
+  void fetchBouquets() {
+    FirebaseFirestore.instance
+        .collection('bouquets')
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      List<Bouquets> bouquets = [];
+      snapshot.docs.forEach((DocumentSnapshot doc) {
+        bouquets.add(Bouquets(
+          doc['image'],
+          doc['title'],
+          (doc['price'] as num).toDouble(),
+          (doc['rating'] as num).toInt(),
+          doc['description'],
+          doc['category'], // Assuming category field in Firestore
+        ));
+      });
+      setState(() {
+        allBouquets = bouquets;
+        filterBouquetsByCategory(_selectedCategory); // Apply filter by default category
+      });
+    });
+  }
+
+  void filterBouquetsByCategory(String category) {
+    setState(() {
+      if (category == 'All') {
+        displayList = allBouquets;
+      } else {
+        displayList = allBouquets.where((bouquet) => bouquet.category == category).toList();
+      }
+    });
+  }
+
+  void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(
+          productName: bouquet.title,
+          productPrice: bouquet.price,
+          productDescription: bouquet.description,
+          productImage: bouquet.image,
+          productRating: bouquet.rating,
+        ),
+      ),
+    );
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -26,121 +81,168 @@ class _HomePageState extends State<HomePage> {
         context,
         MaterialPageRoute(builder: (context) => UserPage()),
       );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => UserPage()),
-      );
     }
+  }
+
+  void goToCartPage(BuildContext context) {
+    // Navigate to cart page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CartPage()), // Replace with your actual cart page
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(Constants.titleFive,
-            style: TextStyle(color: Constants.primaryColor)),
+        title: Text('Florish'),
         actions: [
           IconButton(
-            icon: Icon(Icons.shopping_cart, color: Constants.basicColor),
+            icon: Icon(Icons.search),
             onPressed: () {
-              // Add your shopping cart functionality here
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchPage()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            color: Color.fromARGB(255, 219, 91, 134),
+            onPressed: () {
+              goToCartPage(context);
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: GestureDetector(
-                onTap: () {
-                  // Navigate to the SearchPage when the search bar is tapped
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SearchPage()),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Tìm kiếm",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon:
-                          Icon(Icons.search, color: Constants.basicColor),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              "Danh mục",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                // Example categories
+                _CategoryCard(categoryName: "Lãng mạn"),
+                _CategoryCard(categoryName: "Tiệc cưới"),
+                _CategoryCard(categoryName: "Sinh nhật"),
+                _CategoryCard(categoryName: "Hoa mừng"),
+                // Add more _CategoryCard widgets for additional categories
+              ],
+            ),
+          ),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.75,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: displayList.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    navigateToProductDetail(context, displayList[index]);
+                  },
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 5,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15),
+                            ),
+                            child: Image.network(
+                              displayList[index].image,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayList[index].title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Row(
+                                children: List.generate(
+                                  displayList[index].rating,
+                                  (index) => Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '\$${displayList[index].price}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Text("Danh mục",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  // Example categories
-                  _CategoryCard(categoryName: "Lãng mạn"),
-                  _CategoryCard(categoryName: "Tiệc cưới"),
-                  _CategoryCard(categoryName: "Sinh nhật"),
-                  _CategoryCard(categoryName: "Hoa mừng"),
-                ],
-              ),
-            ),
-            CreateYourOwnBouquet(),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              children: <Widget>[
-                _ProductCard(
-                    productName: "Combo hoa phấn", productPrice: 125000.0, productImage: "assets/images/flower2.jpg", productRating: 5, productDescription: "Một bó hoa tươi tắn với sắc màu nhẹ nhàng."),
-                _ProductCard(
-                    productName: "Combo hoa sẵn", productPrice: 48000.0, productImage: "assets/images/flower2.jpg", productRating: 4, productDescription: "Một bó hoa đẹp sẵn sàng cho mọi dịp."),
-                _ProductCard(productName: "Tulip", productPrice: 400000.0, productImage: "assets/images/flower2.jpg", productRating: 5, productDescription: "Những bông hoa Tulip rực rỡ sắc màu."),
-              ],
-            )
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: 'Favorite'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.reorder_rounded), label: 'My order'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Florish'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
+          BottomNavigationBarItem(icon: Icon(Icons.reorder_rounded), label: 'My Order'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Constants.primaryColor,
-        unselectedItemColor: const Color.fromARGB(255, 226, 98, 188),
+        selectedItemColor: Colors.pink, // Set selected item color to pink
+        unselectedItemColor: Colors.grey, // Set unselected item color to grey
         onTap: _onItemTapped,
       ),
     );
   }
+}
+
+class Bouquets {
+  final String image;
+  final String title;
+  final double price;
+  final int rating;
+  final String description;
+  final String category; // New field for category
+
+  Bouquets(this.image, this.title, this.price, this.rating, this.description, this.category);
 }
 
 class _CategoryCard extends StatelessWidget {
@@ -150,134 +252,27 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Chip(
-        label: Text(categoryName),
-        backgroundColor: Colors.grey[200],
-      ),
-    );
-  }
-}
-
-class CreateYourOwnBouquet extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: const DecorationImage(
-          image:
-              AssetImage("assets/images/flower1.jpg"), // Background image asset
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Text(
-          "Create your own Bouquet\nexpress yourself by create your own unique bouquet",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProductCard extends StatelessWidget {
-  final String productName;
-  final double productPrice;
-  final String productImage;
-  final int productRating;
-  final String productDescription;
-
-  const _ProductCard({
-    Key? key,
-    required this.productName,
-    required this.productPrice,
-    required this.productImage,
-    required this.productRating,
-    required this.productDescription,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
     return Card(
-      child: InkWell(
-        onTap: () {
-          navigateToProductDetail(
-            context,
-            productName,
-            productPrice,
-            productDescription,
-            productImage,
-            productRating,
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.asset(
-                  productImage,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(productName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text("\$${productPrice.toString()}", style: const TextStyle(color: Colors.black)),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, right: 8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.favorite_border, color: Colors.white),
-                  onPressed: () {
-                    // Handle button press
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Text(categoryName),
       ),
     );
   }
 }
 
-void navigateToProductDetail(BuildContext context, String productName,
-    double productPrice, String productDescription, String productImage, int productRating) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ProductDetailPage(
-        productName: productName,
-        productPrice: productPrice,
-        productDescription: productDescription,
-        productImage: productImage,
-        productRating: productRating,
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cart'),
+        backgroundColor: Color.fromARGB(255, 218, 114, 148), // Set the background color here
       ),
-    ),
-  );
-}
-
-void navigateToSearchPage(BuildContext context) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => SearchPage()),
-  );
+      body: Center(
+        child: Text('Your Cart Items'),
+      ),
+    );
+  }
 }
