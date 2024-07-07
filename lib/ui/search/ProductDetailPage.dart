@@ -164,7 +164,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 children: [
                   Text(
                     widget.productName,
-                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 246, 83, 116)),
                   ),
                   SizedBox(height: 10.h),
                   Row(
@@ -206,7 +206,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   SizedBox(height: 10.h),
                   Text(
                     widget.productDescription,
-                    style: TextStyle(fontSize: 18.sp),
+                    style: TextStyle(fontSize: 14.sp),
                   ),
                   SizedBox(height: 20.h),
                   Center(
