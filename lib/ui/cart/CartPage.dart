@@ -12,7 +12,6 @@ class _CartPageState extends State<CartPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // List to store selected items
   List<String> selectedItems = [];
 
   void _incrementQuantity(String docId, int currentQuantity) {
@@ -85,47 +84,90 @@ class _CartPageState extends State<CartPage> {
                     final cartItem = cartItems[index];
                     bool isSelected = selectedItems.contains(cartItem.id);
                     return Card(
-                      child: ListTile(
-                        leading: Image.network(cartItem['imageUrl']),
-                        title: Text(cartItem['productName']),
-                        subtitle: Text('Price: ${cartItem['price']} vnd'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      elevation: 4,
+                      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Row(
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.remove),
-                              onPressed: () {
-                                _decrementQuantity(cartItem.id, cartItem['quantity']);
-                              },
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.network(
+                                cartItem['imageUrl'],
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            Text('${cartItem['quantity']}'),
-                            IconButton(
-                              icon: Icon(Icons.add),
-                              onPressed: () {
-                                _incrementQuantity(cartItem.id, cartItem['quantity']);
-                              },
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cartItem['productName'],
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    'Giá: ${cartItem['price']} vnd',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () {
+                                          _decrementQuantity(cartItem.id, cartItem['quantity']);
+                                        },
+                                      ),
+                                      Text('${cartItem['quantity']}'),
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          _incrementQuantity(cartItem.id, cartItem['quantity']);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            Checkbox(
-                              value: isSelected,
-                              onChanged: (bool? value) {
-                                _toggleSelection(cartItem.id);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () {
-                                _removeItem(cartItem.id);
-                              },
+                            Column(
+                              children: [
+                                Checkbox(
+                                  value: isSelected,
+                                  onChanged: (bool? value) {
+                                    _toggleSelection(cartItem.id);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    _removeItem(cartItem.id);
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      color: isSelected ? Colors.grey.withOpacity(0.5) : null,
+                      color: isSelected ? Colors.grey.withOpacity(0.2) : Colors.white,
                     );
                   },
                 ),
               ),
-              Padding(
+              Container(
+                color: Colors.grey[200],
                 padding: EdgeInsets.all(16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,7 +181,13 @@ class _CartPageState extends State<CartPage> {
                     ),
                     ElevatedButton(
                       onPressed: _checkout,
-                      child: Text('Thanh toán'),
+                      child: Text(
+                        'Thanh toán',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
                     ),
                   ],
                 ),
