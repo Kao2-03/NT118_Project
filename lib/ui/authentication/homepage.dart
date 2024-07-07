@@ -75,7 +75,7 @@ void filterBouquetsByType(String type) {
     );
   }
 
-  void _onItemTapped(int index) {
+void _onItemTapped(int index) {
   setState(() {
     _selectedIndex = index;
   });
@@ -86,10 +86,6 @@ void filterBouquetsByType(String type) {
       context,
       MaterialPageRoute(builder: (context) => UserPage()),
     );
-  } else {
-    // Navigate to the corresponding category
-    String selectedType = _types[index];
-    filterBouquetsByType(selectedType);
   }
 }
 
@@ -247,18 +243,18 @@ void filterBouquetsByType(String type) {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Florish'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
-          BottomNavigationBarItem(icon: Icon(Icons.reorder_rounded), label: 'My Order'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.pink, // Set selected item color to pink
-        unselectedItemColor: Colors.grey, // Set unselected item color to grey
-        onTap: _onItemTapped,
-      ),
+     bottomNavigationBar: BottomNavigationBar(
+  items: const <BottomNavigationBarItem>[
+    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Florish'),
+    BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
+    BottomNavigationBarItem(icon: Icon(Icons.reorder_rounded), label: 'My Order'),
+    BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
+  ],
+  currentIndex: _selectedIndex,
+  selectedItemColor: Colors.pink, // Set selected item color to pink
+  unselectedItemColor: Colors.grey, // Set unselected item color to grey
+  onTap: _onItemTapped,
+),
     );
   }
 }
