@@ -23,10 +23,18 @@ dependencies:
   flutter_svg: ^2.0.10+1
   hive_flutter: ^1.1.0
   english_words: ^4.0.0
+  url_launcher: ^6.0.20
+  crypto: ^3.0.1
+  webview_flutter: ^2.0.14
+  http: ^0.13.5
+  flutter_svg: ^2.0.10
+  flutter_paypal_checkout: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+dependency_overrides:
+  http: ^1.0.0
 flutter:
   uses-material-design: true
   assets:

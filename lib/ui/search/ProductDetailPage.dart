@@ -27,6 +27,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   int cartItemCount = 0;
+  bool isFavorite = false; // Track whether the product is favorited or not
 
   @override
   void initState() {
@@ -94,142 +95,167 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
+  void toggleFavorite() {
+    setState(() {
+      isFavorite = !isFavorite;
+    });
+    // Add logic here to handle favorite/unfavorite action
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.productName),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CartPage()),
-                  );
-                },
-              ),
-              if (cartItemCount > 0)
-                Positioned(
-                  right: 0,
-                  child: Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(6),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.productName),
+      actions: [
+        Stack(
+          children: [
+            IconButton(
+              icon: Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CartPage()),
+                );
+              },
+            ),
+            if (cartItemCount > 0)
+              Positioned(
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 14,
+                    minHeight: 14,
+                  ),
+                  child: Text(
+                    '$cartItemCount',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 8,
                     ),
-                    constraints: BoxConstraints(
-                      minWidth: 14,
-                      minHeight: 14,
-                    ),
-                    child: Text(
-                      '$cartItemCount',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-            ],
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 16.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    widget.productImage,
-                    fit: BoxFit.cover,
-                  ),
+              ),
+          ],
+        ),
+      ],
+    ),
+    body: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 16.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  widget.productImage,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            SizedBox(height: 16.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.productName,
-                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 246, 83, 116)),
-                  ),
-                  SizedBox(height: 10.h),
-                  Row(
-                    children: [
-                      Text(
-                        'Giá: ',
-                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.productName,
+                  style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 246, 83, 116)),
+                ),
+                SizedBox(height: 10.h),
+                Row(
+                  children: [
+                    Text(
+                      'Giá: ',
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '\$${widget.productPrice.toString()}',
+                      style: TextStyle(fontSize: 18.sp, color: Colors.green),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+                Row(
+                  children: [
+                    Text(
+                      'Đánh giá: ',
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      children: List.generate(
+                        widget.productRating,
+                        (index) => Icon(
+                          Icons.star,
+                          color: Colors.yellow,
+                          size: 20.sp,
+                        ),
                       ),
-                      Text(
-                        '\$${widget.productPrice.toString()}',
-                        style: TextStyle(fontSize: 18.sp, color: Colors.green),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  Row(
-                    children: [
-                      Text(
-                        'Đánh giá: ',
-                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                      ),
-                      Row(
-                        children: List.generate(
-                          widget.productRating,
-                          (index) => Icon(
-                            Icons.star,
-                            color: Colors.yellow,
-                            size: 20.sp,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  'Mô tả: ',
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  widget.productDescription,
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            addToCart(widget.productName, widget.productPrice, widget.productImage);
+                          },
+                          child: Text(
+                            'Thêm vào giỏ hàng',
+                            style: TextStyle(fontSize: 15.sp),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+                            backgroundColor: Colors.pink,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    'Mô tả: ',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    widget.productDescription,
-                    style: TextStyle(fontSize: 14.sp),
-                  ),
-                  SizedBox(height: 20.h),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        addToCart(widget.productName, widget.productPrice, widget.productImage);
-                      },
-                      child: Text(
-                        'Thêm vào giỏ hàng',
-                        style: TextStyle(fontSize: 18.sp),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h), backgroundColor: Colors.pink,
-                      ),
                     ),
-                  ),
-                  SizedBox(height: 20.h),
-                ],
-              ),
+                    SizedBox(width: 0.w),
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: () {
+                        toggleFavorite();
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

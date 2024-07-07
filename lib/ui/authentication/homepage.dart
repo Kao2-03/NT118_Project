@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../search/SearchPage.dart'; // Import trang search để điều hướng khi tìm kiếm
 import '../search/ProductDetailPage.dart'; // Import trang chi tiết sản phẩm
 import '../cart/user_account.dart';
+import '../cart/CartPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -291,17 +292,4 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-class CartPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cart'),
-        backgroundColor: Color.fromARGB(255, 218, 114, 148), // Set the background color here
-      ),
-      body: Center(
-        child: Text('Your Cart Items'),
-      ),
-    );
-  }
-}
+
