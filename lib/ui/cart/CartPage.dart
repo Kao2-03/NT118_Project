@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_project/ux/cart/FirebaseService.dart';
+import '../../ux/cart/FirebaseService.dart';
 import 'CartItem.dart';
+import '../payment/order_review.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   final FirebaseService _firebaseService = FirebaseService();
   final ValueNotifier<double> _totalPriceNotifier = ValueNotifier<double>(0.0);
+  List<CartItem> cartItems = [];
 
   @override
   void initState() {
@@ -22,6 +24,34 @@ class _CartPageState extends State<CartPage> {
     double totalPrice = await _firebaseService.calculateTotalPrice();
     _totalPriceNotifier.value = totalPrice;
   }
+
+  void _proceedToCheckout() {
+    List<CartItem> selectedItems = cartItems.where((item) => item.isSelected).toList();
+
+    if (selectedItems.isNotEmpty) {
+      List<Map<String, dynamic>> selectedProducts = selectedItems.map((item) {
+        return {
+          'productId': item.productId ?? '',
+          'productName': item.productName ?? '',
+          'price': item.price ?? 0.0,
+          'quantity': item.quantity ?? 1,
+          'imageUrl': item.imageUrl ?? '',
+        };
+      }).toList();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Checkout(selectedProducts: selectedProducts),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Vui lòng chọn sản phẩm để thanh toán.')),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +78,7 @@ class _CartPageState extends State<CartPage> {
             return Center(child: Text("Giỏ hàng trống"));
           }
 
-          List<CartItem> cartItems = snapshot.data!.docs.map((doc) {
+          cartItems = snapshot.data!.docs.map((doc) {
             return CartItem(
               productId: doc.id,
               productName: doc['productName'],
@@ -97,9 +127,7 @@ class _CartPageState extends State<CartPage> {
                   ],
                 ),
                 GestureDetector(
-                  onTap: () {
-                    // Xử lý chốt đơn
-                  },
+                  onTap: _proceedToCheckout,
                   child: Container(
                     alignment: Alignment.center,
                     height: 50,
