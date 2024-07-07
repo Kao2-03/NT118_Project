@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
           (doc['price'] as num).toDouble(),
           (doc['rating'] as num).toInt(),
           doc['description'],
-          doc['category'], // Assuming category field in Firestore
+          doc['type'], // Assuming category field in Firestore
         ));
       });
       setState(() {
@@ -97,6 +97,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Florish'),
+        
         actions: [
           IconButton(
             icon: Icon(Icons.search),
@@ -116,32 +117,56 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              "Danh mục",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                "Danh mục",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                // Example categories
-                _CategoryCard(categoryName: "Lãng mạn"),
-                _CategoryCard(categoryName: "Tiệc cưới"),
-                _CategoryCard(categoryName: "Sinh nhật"),
-                _CategoryCard(categoryName: "Hoa mừng"),
-                // Add more _CategoryCard widgets for additional categories
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                children: [
+                  // Example categories
+                  _CategoryCard(categoryName: "Lãng mạn", onTap: () => filterBouquetsByCategory("Romantic")),
+                  _CategoryCard(categoryName: "Tiệc cưới", onTap: () => filterBouquetsByCategory("Wedding")),
+                  _CategoryCard(categoryName: "Sinh nhật", onTap: () => filterBouquetsByCategory("Birthday")),
+                  _CategoryCard(categoryName: "Hoa mừng", onTap: () => filterBouquetsByCategory("Congratulations")),
+                  // Add more _CategoryCard widgets for additional categories
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: GridView.builder(
+            SizedBox(height: 16),
+            Container(
+              width: MediaQuery.of(context).size.width , // Take full width of the screen with 16 padding on each side
+              padding: EdgeInsets.all(16.0),
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: AssetImage("assets/images/flower1.jpg"), // Your advertisement image asset
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Text(
+                "Discover our new collection",
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 7, 0, 0),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.75,
@@ -215,8 +240,8 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -247,16 +272,20 @@ class Bouquets {
 
 class _CategoryCard extends StatelessWidget {
   final String categoryName;
+  final VoidCallback onTap;
 
-  const _CategoryCard({Key? key, required this.categoryName}) : super(key: key);
+  const _CategoryCard({Key? key, required this.categoryName, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 8.0),
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Text(categoryName),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(categoryName),
+        ),
       ),
     );
   }
