@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   late List<Bouquets> displayList = [];
   late List<Bouquets> allBouquets = [];
   int _selectedIndex = 0; // Current index for BottomNavigationBar
-  String _selectedType = 'All'; // Default type
+  List<String> _types = ['Sinh nhật', 'Tiệc cưới', 'Hoa mừng', 'Lãng mạn']; // List of types from Firebase
 
   @override
   void initState() {
@@ -50,16 +50,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void filterBouquetsByType(String type) {
-    setState(() {
-      _selectedType = type;
-      if (type == 'All') {
-        displayList = allBouquets; // Hiển thị tất cả sản phẩm nếu chọn 'All'
-      } else {
-        displayList = allBouquets.where((bouquet) => bouquet.type == type).toList();
-      }
-    });
-  }
+void filterBouquetsByType(String type) {
+  setState(() {
+    if (type == 'All') {
+      displayList = allBouquets; // Show all bouquets
+    } else {
+      displayList = allBouquets.where((bouquet) => bouquet.type == type).toList();
+    }
+  });
+}
 
   void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
     Navigator.push(
@@ -77,17 +76,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    if (index == 3) {
-      // Assuming index 3 is 'Profile'
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => UserPage()),
-      );
-    }
+  setState(() {
+    _selectedIndex = index;
+  });
+
+  if (index == 3) {
+    // Navigate to Profile page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UserPage()),
+    );
+  } else {
+    // Navigate to the corresponding category
+    String selectedType = _types[index];
+    filterBouquetsByType(selectedType);
   }
+}
 
   void goToCartPage(BuildContext context) {
     // Navigate to cart page
@@ -137,12 +141,9 @@ class _HomePageState extends State<HomePage> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
-                children: [
-                  _CategoryCard(typeName: "Hoa mừng", onTap: () => filterBouquetsByType("Bó Hoa")),
-                  _CategoryCard(typeName: "Lãng mạn", onTap: () => filterBouquetsByType("Wedding")),
-                  _CategoryCard(typeName: "Tiệc cưới", onTap: () => filterBouquetsByType("Birthday")),
-                  _CategoryCard(typeName: "Sinh nhật", onTap: () => filterBouquetsByType("Congratulations")),
-                ],
+                children: List.generate(_types.length, (index) {
+                  return _CategoryCard(typeName: _types[index], onTap: () => filterBouquetsByType(_types[index]));
+                }),
               ),
             ),
             SizedBox(height: 16),
