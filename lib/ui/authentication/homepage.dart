@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/constants.dart';
 import 'package:flutter_project/ui/myOrder/my_order.dart';
@@ -10,15 +11,77 @@ import 'package:flutter/painting.dart';
 import '../search/ProductDetailPage.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  late List<Bouquets> displayList = [];
+  late List<Bouquets> allBouquets = [];
   int _selectedIndex = 0; // Current index for BottomNavigationBar
+  String _selectedType = 'All'; // Default type
 
-  // Function to handle navigation logic
+  @override
+  void initState() {
+    super.initState();
+    fetchBouquets();
+  }
+
+  void fetchBouquets() {
+    FirebaseFirestore.instance
+        .collection('bouquets')
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      List<Bouquets> bouquets = [];
+      snapshot.docs.forEach((DocumentSnapshot doc) {
+        // Kiểm tra xem các trường cần thiết có tồn tại không
+        if (doc.exists && doc.data() != null && doc['image'] != null && doc['title'] != null &&
+            doc['price'] != null && doc['rating'] != null && doc['description'] != null && doc['type'] != null) {
+          bouquets.add(Bouquets(
+            doc['image'],
+            doc['title'],
+            (doc['price'] as num).toDouble(),
+            (doc['rating'] as num).toInt(),
+            doc['description'],
+            doc['type'],
+          ));
+        }
+      });
+      setState(() {
+        allBouquets = bouquets;
+        displayList = bouquets; // Hiển thị tất cả sản phẩm ban đầu
+      });
+    });
+  }
+
+  void filterBouquetsByType(String type) {
+    setState(() {
+      _selectedType = type;
+      if (type == 'All') {
+        displayList = allBouquets; // Hiển thị tất cả sản phẩm nếu chọn 'All'
+      } else {
+        displayList = allBouquets.where((bouquet) => bouquet.type == type).toList();
+      }
+    });
+  }
+
+  void navigateToProductDetail(BuildContext context, Bouquets bouquet) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(
+          productName: bouquet.title,
+          productPrice: bouquet.price,
+          productDescription: bouquet.description,
+          productImage: bouquet.image,
+          productRating: bouquet.rating,
+        ),
+      ),
+    );
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -46,26 +109,42 @@ class _HomePageState extends State<HomePage> {
 
   }
 
+  void goToCartPage(BuildContext context) {
+    // Navigate to cart page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CartPage()), // Replace with your actual cart page
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(Constants.titleFive,
-            style: TextStyle(color: Constants.primaryColor)),
+        title: Text('Florish'),
+        
         actions: [
           IconButton(
-            icon: Icon(Icons.shopping_cart, color: Constants.basicColor),
+            icon: Icon(Icons.search),
             onPressed: () {
-              // Add your shopping cart functionality here
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchPage()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            color: Color.fromARGB(255, 219, 91, 134),
+            onPressed: () {
+              goToCartPage(context);
             },
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
@@ -102,25 +181,46 @@ class _HomePageState extends State<HomePage> {
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Text("Danh mục",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(
+                "Danh mục",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
-                  // Example categories
-                  _CategoryCard(categoryName: "Lãng mạn"),
-                  _CategoryCard(categoryName: "Tiệc cưới"),
-                  _CategoryCard(categoryName: "Sinh nhật"),
-                  _CategoryCard(categoryName: "Hoa mừng"),
+                  _CategoryCard(typeName: "Hoa mừng", onTap: () => filterBouquetsByType("Bó Hoa")),
+                  _CategoryCard(typeName: "Lãng mạn", onTap: () => filterBouquetsByType("Wedding")),
+                  _CategoryCard(typeName: "Tiệc cưới", onTap: () => filterBouquetsByType("Birthday")),
+                  _CategoryCard(typeName: "Sinh nhật", onTap: () => filterBouquetsByType("Congratulations")),
                 ],
               ),
             ),
-            CreateYourOwnBouquet(),
-            GridView.count(
-              crossAxisCount: 2,
+            SizedBox(height: 16),
+            Container(
+              width: MediaQuery.of(context).size.width , 
+              padding: EdgeInsets.all(16.0),
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: AssetImage("assets/images/flower1.jpg"), // Your advertisement image asset
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Text(
+                "Discover our new collection",
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 7, 0, 0),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16.0),
@@ -153,87 +253,41 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: 'Favorite'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.reorder_rounded), label: 'My order'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Florish'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
+          BottomNavigationBarItem(icon: Icon(Icons.reorder_rounded), label: 'My Order'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Constants.primaryColor,
-        unselectedItemColor: const Color.fromARGB(255, 226, 98, 188),
+        selectedItemColor: Colors.pink, // Set selected item color to pink
+        unselectedItemColor: Colors.grey, // Set unselected item color to grey
         onTap: _onItemTapped,
       ),
     );
   }
 }
 
+class Bouquets {
+  final String image;
+  final String title;
+  final double price;
+  final int rating;
+  final String description;
+  final String type; // Thay đổi từ category thành type
+
+  Bouquets(this.image, this.title, this.price, this.rating, this.description, this.type);
+}
+
 class _CategoryCard extends StatelessWidget {
-  final String categoryName;
+  final String typeName;
+  final VoidCallback onTap;
 
-  const _CategoryCard({Key? key, required this.categoryName}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Chip(
-        label: Text(categoryName),
-        backgroundColor: Colors.grey[200],
-      ),
-    );
-  }
-}
-
-class CreateYourOwnBouquet extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: const DecorationImage(
-          image:
-              AssetImage("assets/images/flower1.jpg"), // Background image asset
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Text(
-          "Create your own Bouquet\nexpress yourself by create your own unique bouquet",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProductCard extends StatelessWidget {
-  final String productName;
-  final double productPrice;
-  final String productImage;
-  final int productRating;
-  final String productDescription;
-
-  const _ProductCard({
-    Key? key,
-    required this.productName,
-    required this.productPrice,
-    required this.productImage,
-    required this.productRating,
-    required this.productDescription,
-  }) : super(key: key);
+  const _CategoryCard({Key? key, required this.typeName, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
       child: InkWell(
         onTap: () {
           navigateToProductDetail(
@@ -305,13 +359,9 @@ void navigateToProductDetail(
         productImage: productImage,
         productRating: productRating,
       ),
-    ),
-  );
-}
-
-void navigateToSearchPage(BuildContext context) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => SearchPage()),
-  );
+      body: Center(
+        child: Text('Your Cart Items'),
+      ),
+    );
+  }
 }
