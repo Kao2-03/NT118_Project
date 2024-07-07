@@ -116,7 +116,7 @@ class _CartPageState extends State<CartPage> {
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    'Price: ${cartItem['price']} vnd',
+                                    'Giá: ${cartItem['price']} vnd',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[600],
