@@ -1,33 +1,39 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/model/wish_list_model.dart';
 import 'package:flutter_svg/svg.dart';
 
 class wishList extends StatefulWidget {
+  static String userId = 'NgSNTazXm2ZTG3NAjWrGeMr82Yx1';
   @override
   State<wishList> createState() => _wishListState();
 }
 
 class _wishListState extends State<wishList> {
-  List<WishListModel> wishlists = [];
 
-  void _getWishList() {
-    wishlists = WishListModel.getWishList();
-  }
+  final _wishlistStream = FirebaseFirestore.instance
+      .collection("wishlist")
+      .where('userID', isEqualTo: wishList.userId)
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
-    _getWishList();
     return Scaffold(
       appBar: appBar(context),
-      body: wishListComponent(),
-    );
-  }
+      body: StreamBuilder(
+        stream: _wishlistStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Connection error');
+          }
 
-  ListView wishListComponent() {
-    return ListView.builder(
-        itemCount: wishlists.length,
-        itemBuilder: (context, index) {
-          return Padding(
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Loading...');
+          }
+          var docs = snapshot.data!.docs;
+          // return Text('${docs.length}');
+          return ListView.builder(
+              itemCount: docs.length, itemBuilder: (context, index) {
+                return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Container(
               width: 882,
@@ -49,7 +55,7 @@ class _wishListState extends State<wishList> {
 
                       // color: Colors.green,
                       child: Image.network(
-                        wishlists[index].imgPath, // Đường link ảnh của bạn
+                        docs[index]['imgURL'], // Đường link ảnh của bạn
                         fit: BoxFit
                             .cover, // Điều chỉnh cách ảnh hiển thị trong Container
                       ),
@@ -73,7 +79,7 @@ class _wishListState extends State<wishList> {
                                   alignment: Alignment
                                       .bottomLeft, // Căn chỉnh văn bản
                                   child: Text(
-                                    wishlists[index].name,
+                                    docs[index]['title'],
                                     style: const TextStyle(
                                         color:
                                             Colors.black, // Đổi màu văn bản
@@ -90,7 +96,7 @@ class _wishListState extends State<wishList> {
                                   alignment: Alignment
                                       .bottomLeft, // Căn chỉnh văn bản
                                   child: Text(
-                                    wishlists[index].describe,
+                                    docs[index]['description'],
                                   ),
                                 ),
                               ),
@@ -104,7 +110,7 @@ class _wishListState extends State<wishList> {
                             alignment:
                                 Alignment.bottomLeft, // Căn chỉnh văn bản
                             child: Text(
-                              wishlists[index].price,
+                              docs[index]['price'],
                               style: const TextStyle(
                                 color: Colors.black, // Đổi màu văn bản
                                 fontSize: 20.0, // Kích thước văn bản
@@ -128,7 +134,10 @@ class _wishListState extends State<wishList> {
               ),
             ),
           );
-        });
+              });
+        },
+      ),
+    );
   }
 
   AppBar appBar(BuildContext context) {
@@ -143,7 +152,7 @@ class _wishListState extends State<wishList> {
       leading: GestureDetector(
         onTap: () {
           // hàm xử lí logic
-          
+
           Navigator.pop(context);
         },
         child: Container(
