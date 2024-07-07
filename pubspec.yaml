@@ -20,6 +20,9 @@ dependencies:
   google_sign_in: ^6.2.1
   flutter_email_sender: ^6.0.3
   mailer: ^6.1.0
+  flutter_svg: ^2.0.10+1
+  hive_flutter: ^1.1.0
+  english_words: ^4.0.0
   url_launcher: ^6.0.20
   crypto: ^3.0.1
   webview_flutter: ^2.0.14
@@ -38,9 +41,20 @@ flutter:
     - assets/images/ # Asset directory for images
     - assets/icons/
     - assets/fonts/
+    - assets/img/
 
   fonts:
     - family: Italianno
       fonts:
         - asset: assets\fonts\Italianno-Regular.ttf
           style: normal
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: fonts/Poppins-SemiBold.ttf
+          weight: 600

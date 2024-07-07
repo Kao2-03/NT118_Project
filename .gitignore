@@ -52,7 +52,3 @@ app.*.map.json
 
 # Java Development Kit (JDK)
 jdk/
-
-# Ignore node_modules for functions and JSON files outside
-/functions/node_modules/
-/*.json
