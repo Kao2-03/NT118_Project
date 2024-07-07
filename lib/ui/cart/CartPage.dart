@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_project/ui/cart/CartAppBar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../cart/CartAppBar.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -85,24 +86,24 @@ class _CartPageState extends State<CartPage> {
                     bool isSelected = selectedItems.contains(cartItem.id);
                     return Card(
                       elevation: 4,
-                      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      margin: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(15.r),
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.w),
                         child: Row(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(15.r),
                               child: Image.network(
                                 cartItem['imageUrl'],
-                                width: 80,
-                                height: 80,
+                                width: 80.w,
+                                height: 80.h,
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            SizedBox(width: 10),
+                            SizedBox(width: 10.w),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,15 +111,15 @@ class _CartPageState extends State<CartPage> {
                                   Text(
                                     cartItem['productName'],
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 5),
+                                  SizedBox(height: 5.h),
                                   Text(
-                                    'Giá: ${cartItem['price']} vnd',
+                                    'Price: ${cartItem['price']} vnd',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       color: Colors.grey[600],
                                     ),
                                   ),
@@ -168,26 +169,39 @@ class _CartPageState extends State<CartPage> {
               ),
               Container(
                 color: Colors.grey[200],
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Column(
                   children: [
-                    Text(
-                      'Tổng tiền: ${totalPrice.toStringAsFixed(2)} vnd',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Tổng tiền: ${totalPrice.toStringAsFixed(2)} vnd',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: _checkout,
-                      child: Text(
-                        'Thanh toán',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _checkout,
+                          child: Text(
+                            'Thanh toán',
+                            style: TextStyle(fontSize: 16.sp),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 246, 83, 116),
+                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
