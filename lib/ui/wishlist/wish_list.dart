@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -10,10 +11,12 @@ class wishList extends StatefulWidget {
 }
 
 class _wishListState extends State<wishList> {
-  
-  final _wishlistStream = FirebaseFirestore.instance
+
+  User? user = FirebaseAuth.instance.currentUser;
+
+  late final _wishlistStream = FirebaseFirestore.instance
       .collection("wishlist")
-      .where('userID', isEqualTo: wishList.userId)
+      .where('userID', isEqualTo: user?.uid)
       .snapshots();
 
   @override
@@ -124,7 +127,9 @@ class _wishListState extends State<wishList> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      deleteWishlist(docs[index].id);
+                    },
                     icon: const Icon(
                       Icons.favorite_border,
                       size: 40.0,
@@ -139,6 +144,13 @@ class _wishListState extends State<wishList> {
         },
       ),
     );
+  }
+
+  Future<void> deleteWishlist(String wishlistId) async {
+  await FirebaseFirestore.instance
+      .collection("wishlist")
+      .doc(wishlistId)
+      .delete();
   }
 
   AppBar appBar(BuildContext context) {

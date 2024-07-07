@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/constants.dart';
+import 'package:flutter_project/ui/myOrder/my_order.dart';
+import 'package:flutter_project/ui/profile/user_account.dart';
+import 'package:flutter_project/ui/wishlist/wish_list.dart';
 import '../cart/CartPage.dart';
 import '../search/SearchPage.dart';
 import 'package:flutter/painting.dart';
-import '../cart/user_account.dart';
+// import '../cart/user_account.dart';
 import '../search/ProductDetailPage.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,12 +29,21 @@ class _HomePageState extends State<HomePage> {
         context,
         MaterialPageRoute(builder: (context) => UserPage()),
       );
-    } else if (index == 2) {
+    }
+    if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => UserPage()),
+        MaterialPageRoute(builder: (context) => MyOrder()),
       );
     }
+
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => wishList()),
+      );
+    }
+
   }
 
   @override
@@ -66,7 +78,8 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
@@ -115,10 +128,24 @@ class _HomePageState extends State<HomePage> {
               mainAxisSpacing: 10,
               children: <Widget>[
                 _ProductCard(
-                    productName: "Combo hoa phấn", productPrice: 125000.0, productImage: "assets/images/flower2.jpg", productRating: 5, productDescription: "Một bó hoa tươi tắn với sắc màu nhẹ nhàng."),
+                    productName: "Combo hoa phấn",
+                    productPrice: 125000.0,
+                    productImage: "assets/images/flower2.jpg",
+                    productRating: 5,
+                    productDescription:
+                        "Một bó hoa tươi tắn với sắc màu nhẹ nhàng."),
                 _ProductCard(
-                    productName: "Combo hoa sẵn", productPrice: 48000.0, productImage: "assets/images/flower2.jpg", productRating: 4, productDescription: "Một bó hoa đẹp sẵn sàng cho mọi dịp."),
-                _ProductCard(productName: "Tulip", productPrice: 400000.0, productImage: "assets/images/flower2.jpg", productRating: 5, productDescription: "Những bông hoa Tulip rực rỡ sắc màu."),
+                    productName: "Combo hoa sẵn",
+                    productPrice: 48000.0,
+                    productImage: "assets/images/flower2.jpg",
+                    productRating: 4,
+                    productDescription: "Một bó hoa đẹp sẵn sàng cho mọi dịp."),
+                _ProductCard(
+                    productName: "Tulip",
+                    productPrice: 400000.0,
+                    productImage: "assets/images/flower2.jpg",
+                    productRating: 5,
+                    productDescription: "Những bông hoa Tulip rực rỡ sắc màu."),
               ],
             )
           ],
@@ -235,8 +262,10 @@ class _ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(productName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text("\$${productPrice.toString()}", style: const TextStyle(color: Colors.black)),
+                  Text(productName,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text("\$${productPrice.toString()}",
+                      style: const TextStyle(color: Colors.black)),
                 ],
               ),
             ),
@@ -259,8 +288,13 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-void navigateToProductDetail(BuildContext context, String productName,
-    double productPrice, String productDescription, String productImage, int productRating) {
+void navigateToProductDetail(
+    BuildContext context,
+    String productName,
+    double productPrice,
+    String productDescription,
+    String productImage,
+    int productRating) {
   Navigator.push(
     context,
     MaterialPageRoute(
