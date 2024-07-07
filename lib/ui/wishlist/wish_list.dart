@@ -4,12 +4,13 @@ import 'package:flutter_svg/svg.dart';
 
 class wishList extends StatefulWidget {
   static String userId = 'NgSNTazXm2ZTG3NAjWrGeMr82Yx1';
+  
   @override
   State<wishList> createState() => _wishListState();
 }
 
 class _wishListState extends State<wishList> {
-
+  
   final _wishlistStream = FirebaseFirestore.instance
       .collection("wishlist")
       .where('userID', isEqualTo: wishList.userId)
