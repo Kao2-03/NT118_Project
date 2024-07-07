@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'ProductDetailPage.dart'; // Import trang chi tiết sản phẩm
+import 'ProductDetail.dart'; // Import trang chi tiết sản phẩm
 
 class Bouquets {
   final String image;
@@ -9,8 +9,6 @@ class Bouquets {
   final int rating;
 
   Bouquets(this.image, this.title, this.price, this.rating);
-
-  get description => null;
 }
 
 class SearchPage extends StatefulWidget {
@@ -19,8 +17,8 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  List<Bouquets> displayList = [];
-  List<Bouquets> allBouquets = [];
+  late List<Bouquets> displayList;
+  late List<Bouquets> allBouquets;
 
   TextEditingController _searchController = TextEditingController();
 
@@ -40,8 +38,8 @@ class _SearchPageState extends State<SearchPage> {
         bouquets.add(Bouquets(
           doc['image'],
           doc['title'],
-          (doc['price'] as num).toDouble(),
-          (doc['rating'] as num).toInt(),
+          doc['price'].toDouble(),
+          doc['rating'],
         ));
       });
       setState(() {
@@ -167,9 +165,8 @@ class _SearchPageState extends State<SearchPage> {
       MaterialPageRoute(
         builder: (context) => ProductDetailPage(
           productName: bouquet.title,
-          productPrice: bouquet.price,
+          productPrice: '\$${bouquet.price}',
           productDescription: 'Mô tả sản phẩm: ${bouquet.title}',
-          productImage: bouquet.image,
         ),
       ),
     );
